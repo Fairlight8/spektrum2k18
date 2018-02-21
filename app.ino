@@ -5,7 +5,7 @@ int pin = 8;
 
 void setup()
 {
-pinMode(pin, OUTPUT);
+pinMode(pin, int);
 }
 
 void loop()
