@@ -4,6 +4,7 @@ const int pin_strobe;
 const int pin_reset;
 const int led1 = 3;
 const int pin_analog = 22;
+const int microsegundos_barra=1000;
 //const int led2;
 //const int led3;
 //const int led4;
@@ -11,7 +12,7 @@ const int pin_analog = 22;
 //const int led6;
 //const int led7;
 const int numero_de_leds = 10;
-const int settling_time = 999; //YA LO DISCUTIREMOS
+const int settling_time = 500; //YA LO DISCUTIREMOS
 //VARIABLES
 boolean Flag_led = false;
 boolean Flag_strobe = false;
@@ -49,6 +50,7 @@ void loop()
 
     for (i = 0; i < 7; i++)
     {
+        //--------------------------------Instante Inicial
         digitalWrite(pin_strobe, LOW);
         instante_inicial = micros(); //micros(de 4 en 4)
         if(lectura[i]<representar[i]){
@@ -67,14 +69,15 @@ void loop()
                 representar[i]=lectura[i];
             }
         }
-        microsegundos_ultimo_led = 1000 * representar[i] - 1000 * ((int)representar[i]);
-        instante_final = instante_inicial + 1000;
+        microsegundos_ultimo_led = microsegundos_barra * representar[i] - microsegundos_barra * ((int)representar[i]);
+        instante_final = instante_inicial + microsegundos_barra;
         instante_led = instante_inicial + microsegundos_ultimo_led;
-        instante_strobe = instante_inicial + settling_time;
+        instante_strobe = instante_inicial + settling_time;//-------y lectura
         for (j = 0; j <= (int)representar[i]; j++)
         {
             digitalWrite(j + led1, HIGH);
         }
+        //-----------------------------------Bucle 1milisegundo
             while (micros() < instante_final)
         {
             if (micros() >= instante_led && !Flag_led)
@@ -82,16 +85,19 @@ void loop()
                 Flag_led = true;
                 digitalWrite((int)representar[i] + led1, LOW);
             }
-            if (micros() <= instante_strobe && !Flag_strobe)
+            if (micros() >= instante_strobe && !Flag_strobe)
             {
                 Flag_strobe = true;
                 lectura_analog = analogRead(pin_analog);
                 if (i == 6)
                 {
-                    //------------------------------OJO COÑO
-                    digitalWrite(pin_reset, HIGH);//OJO CUIDAO
-                    //------------------------------EEEEEEEH HOSTIA
+                    digitalWrite(pin_reset, HIGH);//---------OJO CUIDAO
+                    unsigned long instante_reset = instante_strobe+ 1;
                     lectura[0] = (lectura_analog * numero_de_leds) / 1024;
+                    while(micros()<=instante_reset){
+                        
+                    }
+                    digitalWrite(pin_reset, LOW);
                 }
                 else
                 {
@@ -100,18 +106,10 @@ void loop()
                 digitalWrite(pin_strobe, HIGH);
             }
         }
-
-        //delay until time;
-        //encender_leds
-        //}
-        //strobe=0
-        //led decimal on
-        //delay(decimal-Ts)
-        //leer R2D2
-        //strobe=1
-        //delay(Ts)
-        //led decimal off
-        //delay(1000-decimal)
+        for (j = 0; j <= numero_de_leds; j++)
+        {
+            digitalWrite(j + led1, LOW);
+        }
     }
 
 }
