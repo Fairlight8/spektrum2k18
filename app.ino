@@ -1,13 +1,19 @@
 //PARAMETROS
 const float maxstep = 10;
-const int pin_strobe;
-const int pin_reset;
-const int led1 = 3;
-const int pin_analog = 22;
+const int pin_strobe=26;
+const int pin_reset=27;//------2 pines
+const int pin_barra2=25;
+const int pin_barra1=24;
+const int pin_barra0=23;//-----3 pines
+const int led1 = 3;//------10 pines
+const int pin_analog = 22;//1 pin
 const int microsegundos_barra=1000;
-//const int led2;
-//const int led3;
-//const int led4;
+const int barra_2[7]{0, 0, 0, 0, 1, 1, 1};
+const int barra_1[7]{0, 0, 1, 1, 0, 0, 1};
+const int barra_0[7]{0, 1, 0, 1, 0, 1, 0};
+//const int led2;//--total 16 pines
+//const int led3;000 001 010 011 100 101 110 111
+//const int led4;1   2    3   4  5   6    7
 //const int led5;
 //const int led6;
 //const int led7;
@@ -17,6 +23,7 @@ const int settling_time = 500; //YA LO DISCUTIREMOS
 boolean Flag_led = false;
 boolean Flag_strobe = false;
 unsigned long instante_inicial, instante_final, instante_led, instante_strobe;
+
 int microsegundos_ultimo_led;
 int lectura_analog;
 float lectura[7] = {0, 0, 0, 0, 0, 0, 0};
@@ -29,7 +36,7 @@ void setup()
     pinMode(pin_strobe, OUTPUT);
     for (j = 0; j < 10; j++)
     {
-        pinMode(j + led1, OUTPUT) //todos los leds de salida
+        pinMode(j + led1, OUTPUT); //todos los leds de salida
     }
     //leemos la primera barra
     digitalWrite(pin_reset, HIGH);
@@ -43,6 +50,7 @@ void setup()
     lectura[0] = representar[0] = (lectura_analog * numero_de_leds) / 1024;
     digitalWrite(pin_strobe, HIGH);
     delayMicroseconds(75);
+
 }
 
 void loop()
@@ -51,6 +59,10 @@ void loop()
     for (i = 0; i < 7; i++)
     {
         //--------------------------------Instante Inicial
+        //habilitar la barra correspondiente
+        digitalWrite(pin_barra2, barra_2[i]);
+        digitalWrite(pin_barra1, barra_1[i]);
+        digitalWrite(pin_barra0, barra_0[i]);
         digitalWrite(pin_strobe, LOW);
         instante_inicial = micros(); //micros(de 4 en 4)
         if(lectura[i]<representar[i]){
@@ -110,6 +122,7 @@ void loop()
         {
             digitalWrite(j + led1, LOW);
         }
+        //deshabilitar la barra correspondiente
     }
 
 }
