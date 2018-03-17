@@ -1,12 +1,12 @@
 //PARAMETROS
-const float maxstep = 10;
+const float maxstep = 0.1;
 const int pin_strobe=26;
 const int pin_reset=27;//------2 pines
 const int pin_barra2=25;
 const int pin_barra1=24;
 const int pin_barra0=23;//-----3 pines
 const int led1 = 3;//------10 pines
-const int pin_analog = 22;//1 pin
+const int pin_analog = A7;//1 pin
 const int microsegundos_barra=1000;
 const int barra_2[7]{0, 0, 0, 0, 1, 1, 1};
 const int barra_1[7]{0, 0, 1, 1, 0, 0, 1};
@@ -30,6 +30,7 @@ float lectura[7] = {0, 0, 0, 0, 0, 0, 0};
 float representar[7] = {0, 0, 0, 0, 0, 0, 0};
 int i, j;
 //--------------------------------------
+int contadordebug=0;
 void setup()
 {
     pinMode(pin_reset, OUTPUT);
@@ -54,10 +55,11 @@ void setup()
 }
 
 void loop()
-{
+{   
+  
 
-    for (i = 0; i < 7; i++)
-    {
+    for (i = 0; i < 7; i++){
+        
         //--------------------------------Instante Inicial
         //habilitar la barra correspondiente
         digitalWrite(pin_barra2, barra_2[i]);
@@ -65,8 +67,10 @@ void loop()
         digitalWrite(pin_barra0, barra_0[i]);
         digitalWrite(pin_strobe, LOW);
         instante_inicial = micros(); //micros(de 4 en 4)
+        Flag_led = false;
+        Flag_strobe = false;
         if(lectura[i]<representar[i]){
-            if(representar[i]-lectura[i]>maxstep){
+            if((representar[i]-lectura[i])>maxstep){
                 representar[i]-=maxstep;
             }
             else{
@@ -74,7 +78,7 @@ void loop()
             }
         }
         else{
-            if(lectura[i]-representar[i]>maxstep){
+            if((lectura[i]-representar[i])>maxstep){
                 representar[i]+=maxstep;
             }
             else{
@@ -97,10 +101,11 @@ void loop()
                 Flag_led = true;
                 digitalWrite((int)representar[i] + led1, LOW);
             }
-            if (micros() >= instante_strobe && !Flag_strobe)
+            if ((micros() >= instante_strobe )&& !Flag_strobe)
             {
                 Flag_strobe = true;
                 lectura_analog = analogRead(pin_analog);
+                
                 if (i == 6)
                 {
                     digitalWrite(pin_reset, HIGH);//---------OJO CUIDAO
@@ -124,5 +129,5 @@ void loop()
         }
         //deshabilitar la barra correspondiente
     }
-
+  
 }
